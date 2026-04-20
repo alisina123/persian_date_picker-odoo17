@@ -2,14 +2,7 @@
 
 import { patch } from "@web/core/utils/patch";
 import { DateTimeField } from "@web/views/fields/datetime/datetime_field";
-import {
-      areDatesEqual,
-      deserializeDate,
-      deserializeDateTime,
-      formatDate,
-      formatDateTime,
-      today,
-  } from "@web/core/l10n/dates";
+import { formatDate, formatDateTime } from "@web/core/l10n/dates";
 
 
 

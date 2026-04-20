@@ -8,6 +8,7 @@ import { ensureArray, zip, zipWith } from "@web/core/utils/arrays";
 import { deepCopy, shallowEqual } from "@web/core/utils/objects";
 import { DateTimePicker } from "@web/core/datetime/datetime_picker";
 import { DateTimePickerPopover } from "@web/core/datetime/datetime_picker_popover";
+import { getFarvardin, isPersianLocale } from "./compat";
 
 /**
  * @typedef {luxon.DateTime} DateTime
@@ -337,27 +338,28 @@ export const datetimePickerService = {
                     }
                     const [formattedValue] = safeConvert("format", value);
 
-                    if(luxon.DateTime.now().locale == 'fa-IR'){
+                    const farvardinLib = getFarvardin();
+                    if (isPersianLocale() && farvardinLib){
                         let jressult_str = ""
                         if(formattedValue.split(' ')[1]){
                             if(formattedValue.split(' ')[0].split('/')[2]){
                                 const gressult = formattedValue.split(' ')[0].split('/');
-                                const jressult = farvardin.gregorianToSolar(parseInt(gressult[0]) , parseInt(gressult[1]) , parseInt(gressult[2]));
+                                const jressult = farvardinLib.gregorianToSolar(parseInt(gressult[0]) , parseInt(gressult[1]) , parseInt(gressult[2]));
                                 jressult_str =  `${jressult[0]}/${leftPad(jressult[1], 2)}/${leftPad(jressult[2], 2)} ${formattedValue.split(' ')[1]}`;
                             }else if(formattedValue.split(' ')[0].split('-')[2]){
                                 const gressult = formattedValue.split(' ')[0].split('-');
-                                const jressult = farvardin.gregorianToSolar(parseInt(gressult[0]) , parseInt(gressult[1]) , parseInt(gressult[2]));
+                                const jressult = farvardinLib.gregorianToSolar(parseInt(gressult[0]) , parseInt(gressult[1]) , parseInt(gressult[2]));
                                 jressult_str =  `${jressult[0]}-${leftPad(jressult[1], 2)}-${leftPad(jressult[2], 2)} ${formattedValue.split(' ')[1]}`;
                             }
                         }
                         else{
                             if(formattedValue.split('/')[2]){
                                 const gressult = formattedValue.split('/');
-                                const jressult = farvardin.gregorianToSolar(parseInt(gressult[0]) , parseInt(gressult[1]) , parseInt(gressult[2]));
+                                const jressult = farvardinLib.gregorianToSolar(parseInt(gressult[0]) , parseInt(gressult[1]) , parseInt(gressult[2]));
                                 jressult_str =  `${jressult[0]}/${leftPad(jressult[1], 2)}/${leftPad(jressult[2], 2)}`;
                             }else if(formattedValue.split('-')[2]){
                                 const gressult = formattedValue.split('-');
-                                const jressult = farvardin.gregorianToSolar(parseInt(gressult[0]) , parseInt(gressult[1]) , parseInt(gressult[2]));
+                                const jressult = farvardinLib.gregorianToSolar(parseInt(gressult[0]) , parseInt(gressult[1]) , parseInt(gressult[2]));
                                 jressult_str =  `${jressult[0]}-${leftPad(jressult[1], 2)}-${leftPad(jressult[2], 2)}`;
                             }
     
@@ -398,6 +400,8 @@ export const datetimePickerService = {
                 };
 
                 const updateValueFromInputs = () => {
+                    const farvardinLib = getFarvardin();
+                    const shouldConvertToGregorian = isPersianLocale() && !!farvardinLib;
                     const values = zipWith(
                         getInputs(),
                         ensureArray(pickerProps.value),
@@ -405,40 +409,39 @@ export const datetimePickerService = {
                             if (!el) {
                                 return currentValue;
                             }
+
                             let jressult_str = "";
-
-                            
-                            if(el.value.split(' ')[1]){
-                                if(el.value.split(' ')[0].split('/')[2]){
-                                    const gressult = el.value.split(' ')[0].split('/');
-                                    const jressult = farvardin.solarToGregorian(parseInt(gressult[0]) , parseInt(gressult[1]) , parseInt(gressult[2]));
-                                    jressult_str =  `${jressult[0]}/${jressult[1]}/${jressult[2]} ${el.value.split(' ')[1]}`;
-                                }else if(el.value.split(' ')[0].split('-')[2]){
-                                    const gressult = el.value.split(' ')[0].split('-');
-                                    const jressult = farvardin.solarToGregorian(parseInt(gressult[0]) , parseInt(gressult[1]) , parseInt(gressult[2]));
-                                    jressult_str =  `${jressult[0]}-${leftPad(jressult[1], 2)}-${leftPad(jressult[2], 2)} ${el.value.split(' ')[1]}`;
+                            if (shouldConvertToGregorian) {
+                                if (el.value.split(' ')[1]) {
+                                    if (el.value.split(' ')[0].split('/')[2]) {
+                                        const gressult = el.value.split(' ')[0].split('/');
+                                        const jressult = farvardinLib.solarToGregorian(parseInt(gressult[0]), parseInt(gressult[1]), parseInt(gressult[2]));
+                                        jressult_str = `${jressult[0]}/${jressult[1]}/${jressult[2]} ${el.value.split(' ')[1]}`;
+                                    } else if (el.value.split(' ')[0].split('-')[2]) {
+                                        const gressult = el.value.split(' ')[0].split('-');
+                                        const jressult = farvardinLib.solarToGregorian(parseInt(gressult[0]), parseInt(gressult[1]), parseInt(gressult[2]));
+                                        jressult_str = `${jressult[0]}-${leftPad(jressult[1], 2)}-${leftPad(jressult[2], 2)} ${el.value.split(' ')[1]}`;
+                                    }
+                                } else {
+                                    if (el.value.split('/')[2]) {
+                                        const gressult = el.value.split('/');
+                                        const jressult = farvardinLib.solarToGregorian(parseInt(gressult[0]), parseInt(gressult[1]), parseInt(gressult[2]));
+                                        jressult_str = `${jressult[0]}/${jressult[1]}/${jressult[2]}`;
+                                    } else if (el.value.split('-')[2]) {
+                                        const gressult = el.value.split('-');
+                                        const jressult = farvardinLib.solarToGregorian(parseInt(gressult[0]), parseInt(gressult[1]), parseInt(gressult[2]));
+                                        jressult_str = `${jressult[0]}-${leftPad(jressult[1], 2)}-${leftPad(jressult[2], 2)}`;
+                                    }
                                 }
                             }
-                            else{
-                                if(el.value.split('/')[2]){
-                                    const gressult = el.value.split('/');
-                                    const jressult = farvardin.solarToGregorian(parseInt(gressult[0]) , parseInt(gressult[1]) , parseInt(gressult[2]));
-                                    jressult_str =  `${jressult[0]}/${jressult[1]}/${jressult[2]}`;
-                                }else if(el.value.split('-')[2]){
-                                    const gressult = el.value.split('-');
-                                    const jressult = farvardin.solarToGregorian(parseInt(gressult[0]) , parseInt(gressult[1]) , parseInt(gressult[2]));
-                                    jressult_str =  `${jressult[0]}-${leftPad(jressult[1], 2)}-${leftPad(jressult[2], 2)}`;
-                                }
-                            }
-                            
 
-                            const [parsedValue, error] = safeConvert("parse", jressult_str);
+                            const valueToParse = jressult_str || el.value;
+                            const [parsedValue, error] = safeConvert("parse", valueToParse);
                             if (error) {
                                 updateInput(el, currentValue);
                                 return currentValue;
-                            } else {
-                                return parsedValue;
                             }
+                            return parsedValue;
                         }
                     );
                     updateValue(values.length === 2 ? values : values[0]);
@@ -544,5 +547,8 @@ export const datetimePickerService = {
     },
 };
 
-registry.category("services").remove("datetime_picker");
-registry.category("services").add("datetime_picker", datetimePickerService);
+const servicesRegistry = registry.category("services");
+if (servicesRegistry.contains("datetime_picker")) {
+    servicesRegistry.remove("datetime_picker");
+}
+servicesRegistry.add("datetime_picker", datetimePickerService);

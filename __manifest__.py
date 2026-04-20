@@ -20,6 +20,7 @@
             'shamsi_calendar/static/src/js/main.js',
             'shamsi_calendar/static/src/js/persian-date.js',
             'shamsi_calendar/static/src/js/farvardin.js',
+            'shamsi_calendar/static/src/js/compat.js',
             'shamsi_calendar/static/src/js/datetimepicker_service.js',
             'shamsi_calendar/static/src/js/loader.js',
         ],
